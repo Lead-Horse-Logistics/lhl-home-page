@@ -3,8 +3,10 @@ on:
   push:
     branches:
       - main
+      - staging
 jobs:
-  run:
+  production:
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
         - uses: actions/checkout@v2
@@ -23,5 +25,28 @@ jobs:
             BUCKET: ${{ secrets.S3_BUCKET }}
             BUILD_DIR: dist
             CDN_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+            INVALIDATE_CACHE: true
+            INVALIDATION_PATH: /
+
+  staging:
+    if: ${{ github.ref == 'refs/heads/staging' }}
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v2
+
+        - name: Install dependencies
+          run: yarn
+
+        - name: Build
+          run: yarn build
+
+        - name: Deploy
+          uses: docker://gcmcnutt/s3-deploy:1.0
+          env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            BUCKET: ${{ secrets.S3_BUCKET_STAGING }}
+            BUILD_DIR: dist
+            CDN_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_STAGING }}
             INVALIDATE_CACHE: true
             INVALIDATION_PATH: /
