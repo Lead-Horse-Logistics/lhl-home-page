@@ -49,4 +49,4 @@ jobs:
             BUILD_DIR: dist
             CDN_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_STAGING }}
             INVALIDATE_CACHE: true
-            INVALIDATION_PATH: /
+            INVALIDATION_PATH: /*
